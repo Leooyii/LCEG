@@ -1,5 +1,5 @@
 <h1 align="center">
-<!-- <img src="./logo.png" width="100" alt="" /> -->
+<!-- <img src="./fig/.png" width="100" alt="" /> -->
 <br>
 A Controlled Study on Long Context Extension and Generalization in LLMs
 </h1>
@@ -15,6 +15,8 @@ A Controlled Study on Long Context Extension and Generalization in LLMs
 <p align="center">
 Repo for "<a href="https://arxiv.org/" target="_blank">A Controlled Study on Long Context Extension and Generalization in LLMs</a>"
 </p>
+
+<img src="./fig/needle.png" width="100" alt="" />
 
 ## TABLE OF CONTENTS
 1. [News](#news)
