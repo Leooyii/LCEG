@@ -247,12 +247,13 @@ done
 
 ## Acknowledgements
 We sincerely appreciate the assistance provided by the following people (works):
-- We 
+- We thank Yao Fu, Yue Yu, Tianyu Gao,  Celine Lee, Woojeong Kim, Jack Morris, Junxiong Wang, and Oscar Yin for their suggestions and feedback.
+- Some evaluation code is modified upon [Landmark Attention](https://github.com/epfml/landmark-attention), [LongLora](https://github.com/dvlab-research/LongLoRA), [LongBench](https://github.com/THUDM/LongBench), [Long Context Data Engerneering](https://github.com/FranxYao/Long-Context-Data-Engineering) and [RULER](https://github.com/hsiehjackson/RULER).
 
 ## Citation
 If you find it helpful, please kindly cite the paper.
-```
+<!-- ```
 
-```
+``` -->
 
-## License
+<!-- ## License -->
