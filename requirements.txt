@@ -1,0 +1,12 @@
+transformers==4.35.2
+tensor_parallel==2.0.0
+flash-attn==2.3.6
+datasets==2.15.0
+deepspeed==0.12.5
+evaluate==0.4.1
+numpy==1.23.4
+tqdm==4.65.2
+seaborn
+pandas
+matplotlib
+wandb
