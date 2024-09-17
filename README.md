@@ -16,7 +16,7 @@ A Controlled Study on Long Context Extension and Generalization in LLMs
 Repo for "<a href="https://arxiv.org/" target="_blank">A Controlled Study on Long Context Extension and Generalization in LLMs</a>"
 </p>
 
-<img src="./fig/needle.png" width="100" alt="" />
+<img src="./fig/needle.png" width="1000" alt="" />
 
 ## TABLE OF CONTENTS
 1. [News](#news)
