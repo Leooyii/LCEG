@@ -7,6 +7,11 @@ import numpy as np
 from tqdm import tqdm
 import transformers
 import json
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+models_dir = os.path.dirname(current_dir)
+sys.path.append(models_dir)
 
 def parse_config():
     parser = argparse.ArgumentParser(description='arg parser')

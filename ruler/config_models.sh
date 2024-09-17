@@ -44,6 +44,13 @@ MODEL_SELECT() {
             TOKENIZER_PATH=${MODEL_PATH}
             TOKENIZER_TYPE="hf"
             ;;
+        llama2-7b-hf-selfextend)
+            MODEL_PATH=
+            MODEL_TEMPLATE_TYPE="base"
+            MODEL_FRAMEWORK="hf"
+            TOKENIZER_PATH=${MODEL_PATH}
+            TOKENIZER_TYPE="hf"
+            ;;
         llama2-7b-hf-ntk-frozen)
             MODEL_PATH=
             MODEL_TEMPLATE_TYPE="base"
@@ -73,6 +80,13 @@ MODEL_SELECT() {
             TOKENIZER_TYPE="hf"
             ;;
         llama2-7b-hf-slimpajama-ntk-64k-2B)
+            MODEL_PATH=
+            MODEL_TEMPLATE_TYPE="base"
+            MODEL_FRAMEWORK="hf"
+            TOKENIZER_PATH=${MODEL_PATH}
+            TOKENIZER_TYPE="hf"
+            ;;
+        llama2-7b-hf-slimpajama-clex-32k)
             MODEL_PATH=
             MODEL_TEMPLATE_TYPE="base"
             MODEL_FRAMEWORK="hf"

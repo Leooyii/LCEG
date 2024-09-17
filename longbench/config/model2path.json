@@ -15,13 +15,6 @@
     "llama2-7b-hf-slimpajama-yarn-32k":"",
     "llama2-7b-hf-slimpajama-longlora-32k":"",
     "llama2-7b-hf-slimpajama-landmark":"",
-    "llama2-7b-hf-lminfinite-test4k":"",
-    "llama2-7b-hf-ntk-frozen-test4k":"",
-    "llama2-7b-hf-slimpajama-pi-32k-test4k":"",
-    "llama2-7b-hf-slimpajama-ntk-32k-test4k":"",
-    "llama2-7b-hf-slimpajama-ntk-64k-test4k":"",
-    "llama-2-7b-hf-slimpajama-ntk-64k-2B-test4k":"",
-    "llama2-7b-hf-slimpajama-yarn-32k-test4k":"",
-    "llama2-7b-hf-slimpajama-longlora-32k-test4k":"",
-    "llama2-7b-hf-slimpajama-landmark-test4k":""
+    "llama2-7b-hf-selfextend":"",
+    "llama2-7b-hf-slimpajama-clex-32k":""
 }

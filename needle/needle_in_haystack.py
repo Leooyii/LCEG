@@ -40,19 +40,21 @@ import json
 import tensor_parallel as tp
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import transformers
-# from anthropic import Anthropic
-#from dotenv import load_dotenv
 import numpy as np
 import argparse
 from rouge_score import rouge_scorer
 import tensor_parallel as tp
-
-scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
-
 from openai import OpenAI
 from datetime import datetime, timezone
 import time
 import torch
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+models_dir = os.path.dirname(current_dir)
+sys.path.append(models_dir)
+
+scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
 
 class LLMNeedleHaystackTester:
     """
@@ -181,6 +183,18 @@ class LLMNeedleHaystackTester:
                                                         ).eval()
 
                 self.model_to_test = tp.tensor_parallel(self.model_to_test, sharded=True)
+            elif test_name == "llama2-7b-hf-slimpajama-clex-32k":
+                print('eval clex')
+                from models.llama_clex import LlamaForCausalLM, CLEXLlamaConfig
+                config = CLEXLlamaConfig.from_pretrained(model_name,)
+                config.log_scale = True
+                config.use_flashattn = True
+                print(config.rope_scaling, flush=True)
+                self.model_to_test = LlamaForCausalLM.from_pretrained(model_name,
+                                                        use_flash_attention_2="flash_attention_2", 
+                                                        torch_dtype=torch.bfloat16,
+                                                        device_map="auto",
+                                                        ).eval()
             elif test_name == "llama-2-7b-hf-slimpajama-ntk-32k":
                 print(f'testing {test_name}')
                 config = transformers.AutoConfig.from_pretrained(model_name)
@@ -247,6 +261,17 @@ class LLMNeedleHaystackTester:
                 self.model_to_test.resize_token_embeddings(32001)
 
                 self.model_to_test = tp.tensor_parallel(self.model_to_test, sharded=True)
+
+            elif test_name == "llama-2-7b-hf-selfextend":
+                from transformers import AutoModelForCausalLM
+                from models.llama_selfextend import SelfExtend
+                window_size = 1024
+                group_size = 64
+                use_flash = True
+                self.model_to_test = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto", torch_dtype=torch.bfloat16, use_flash_attention_2=use_flash)
+                print(f'using group size {group_size} using window size {window_size}')
+                SelfExtend.apply(self.model_to_test, group_size, window_size, enable_flash_attention=use_flash, flash_attention_impl="flash_attn") ## flash_attention_impl="triton" or "flash_attn"
+
             else:
                 self.model_to_test = AutoModelForCausalLM.from_pretrained(model_name,
                                                                     use_flash_attention_2="flash_attention_2", 

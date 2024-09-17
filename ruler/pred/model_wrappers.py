@@ -17,6 +17,12 @@ import logging
 import requests
 import torch
 from typing import Dict, List, Optional
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+models_dir = os.path.dirname(os.path.dirname(current_dir))
+sys.path.append(models_dir)
 
 
 class HuggingFaceModel:
@@ -24,14 +30,97 @@ class HuggingFaceModel:
         from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, pipeline
 
         self.tokenizer = AutoTokenizer.from_pretrained(name_or_path, trust_remote_code=True)
+        model_kwargs = {"use_flash_attention_2": "True"}
+        if model_full_name == "llama2-7b-hf" or model_full_name == "llama-2-7b-hf-slimpajama-pi-32k":
+            print(f'testing {model_full_name}')
+            print(f'load model:{name_or_path}')
+            self.pipeline = None
+                # Set RoPE scaling factor
+            config = AutoConfig.from_pretrained(
+                name_or_path
+            )
+            print(config.rope_scaling)
+            print('testing length:', max_seq_length)
+            
+            # Load model and tokenizer
+            import transformers
+            self.model = transformers.AutoModelForCausalLM.from_pretrained(
+                name_or_path,
+                config=config,
+                torch_dtype=torch.float16,
+                attn_implementation="flash_attention_2",
+                device_map="auto",
+            )
+            generation_kwargs['use_cache'] = True
+        elif model_full_name == "llama2-7b-hf-ntk-frozen":
+            print(f'testing {model_full_name}')
+            print(f'load model:{name_or_path}')
+            self.pipeline = None
+                # Set RoPE scaling factor
+            config = AutoConfig.from_pretrained(
+                name_or_path
+            )
+            scaling_factor = 2.0
+            config.rope_scaling = {"type": "dynamic", "factor": scaling_factor}
+            print(config.rope_scaling)
+            print('testing length:', max_seq_length)
 
-        if 'Yarn-Llama' in name_or_path:
-            model_kwargs = None
-        else:
-            # model_kwargs = {"attn_implementation": "flash_attention_2"}
-            model_kwargs = {"use_flash_attention_2": "True"}
+            
+            # Load model and tokenizer
+            import transformers
+            self.model = transformers.AutoModelForCausalLM.from_pretrained(
+                name_or_path,
+                config=config,
+                torch_dtype=torch.float16,
+                attn_implementation="flash_attention_2",
+                device_map="auto",
+            )
+            generation_kwargs['use_cache'] = True
 
-        if 'lminfinite' in model_full_name:
+        elif model_full_name == "llama-2-7b-hf-slimpajama-ntk-32k":
+            print(f'testing {model_full_name}')
+            print(f'load model:{name_or_path}')
+            self.pipeline = None
+                # Set RoPE scaling factor
+            config = AutoConfig.from_pretrained(
+                name_or_path
+            )
+            print(config.rope_scaling)
+            print('testing length:', max_seq_length)
+            
+            # Load model and tokenizer
+            from models.llama_ntk_32k import LlamaForCausalLM
+            self.model = LlamaForCausalLM.from_pretrained(
+                name_or_path,
+                config=config,
+                torch_dtype=torch.float16,
+                attn_implementation="flash_attention_2",
+                device_map="auto",
+            )
+            generation_kwargs['use_cache'] = True
+        elif model_full_name == "llama-2-7b-hf-slimpajama-ntk-64k":
+            print(f'testing {model_full_name}')
+            print(f'load model:{name_or_path}')
+            self.pipeline = None
+                # Set RoPE scaling factor
+            config = AutoConfig.from_pretrained(
+                name_or_path
+            )
+            print(config.rope_scaling)
+            print('testing length:', max_seq_length)
+            
+            # Load model and tokenizer
+            from models.llama_ntk_64k import LlamaForCausalLM
+            self.model = LlamaForCausalLM.from_pretrained(
+                name_or_path,
+                config=config,
+                torch_dtype=torch.float16,
+                attn_implementation="flash_attention_2",
+                device_map="auto",
+            )
+            generation_kwargs['use_cache'] = True
+
+        elif model_full_name == "llama2-7b-hf-lminfinite":
             print('testing lminfinite')
             print(f'load model:{name_or_path}')
             self.pipeline = None
@@ -44,31 +133,58 @@ class HuggingFaceModel:
             )
             self.model = convert_llama_model(self.model, 4096, 10)
             generation_kwargs['use_cache'] = True
-        elif 'ntk' in model_full_name:
+
+        elif model_full_name == "llama2-7b-hf-selfextend":
+            print('testing selfextend')
+            print(f'load model:{name_or_path}')
+            self.pipeline = None
+
+            from transformers import AutoModelForCausalLM
+            from models.llama_selfextend import SelfExtend
+            window_size = 1024
+            group_size = 64
+            use_flash = True
+            self.model = AutoModelForCausalLM.from_pretrained(name_or_path, device_map="auto", torch_dtype=torch.bfloat16, use_flash_attention_2=use_flash)
+            print(f'using group size {group_size} using window size {window_size}')
+            SelfExtend.apply(self.model, group_size, window_size, enable_flash_attention=use_flash, flash_attention_impl="flash_attn") ## flash_attention_impl="triton" or "flash_attn"
+            
+            generation_kwargs['use_cache'] = True
+
+        elif model_full_name == "llama2-7b-hf-slimpajama-yarn-32k":
             print(f'testing {model_full_name}')
             print(f'load model:{name_or_path}')
             self.pipeline = None
-                # Set RoPE scaling factor
-            config = AutoConfig.from_pretrained(
-                name_or_path
-            )
-            maxlength2base_factor = {
-                'llama2-7b-hf-ntk-frozen':{'4096':1,'8192':3,'16384':7,'32768':15,'65536':31},
-                'llama-2-7b-hf-slimpajama-ntk-32k':{'4096':13,'8192':29,'16384':29,'32768':29,'65536':61},
-                'llama2-7b-hf-slimpajama-ntk-64k':{'4096':25,'8192':25,'16384':57,'32768':57,'65536':57},
-                'llama2-7b-hf-slimpajama-ntk-64k-2B':{'4096':25,'8192':25,'16384':57,'32768':57,'65536':57},
+            from models.llama_yarn.modeling_llama_yarn import LlamaForCausalLM
+            from models.llama_yarn.configuration_llama import LlamaConfig
+            config_cls = LlamaConfig
+            model_cls = LlamaForCausalLM
+            config = config_cls.from_pretrained(name_or_path)
+            if model_full_name=="llama2-7b-hf-slimpajama-yarn-dynamic-32k":
+                config.rope_scaling = {
+                    "type": "dynamic-yarn",
+                    "factor": 8.0,
+                    "original_max_position_embeddings": 4096
                 }
-            print(config.rope_scaling)
-            config.base_factor = maxlength2base_factor[model_full_name][str(max_seq_length)]
-            print('testing length:', max_seq_length)
-            print('using base factor:', config.base_factor)
-            base = 10000 * (
-                    (config.base_factor)
-                ) ** (128 / (128 - 2))
-            print('setting base:', base)
 
-            from models.llama_ntk import LlamaForCausalLM
-            # Load model and tokenizer
+            print(config.rope_scaling)
+            self.model = model_cls.from_pretrained(
+                name_or_path,
+                config=config,
+                torch_dtype=torch.float16,
+                use_flash_attention_2=True,
+                device_map="auto",
+            )
+            generation_kwargs['use_cache'] = True
+
+        elif model_full_name == "llama2-7b-hf-slimpajama-clex-32k":
+            print(f'testing {model_full_name}')
+            print(f'load model:{name_or_path}')
+            self.pipeline = None
+            from models.llama_clex import LlamaForCausalLM, CLEXLlamaConfig
+            config = CLEXLlamaConfig.from_pretrained(name_or_path)
+            config.log_scale = True
+            config.use_flashattn = True
+            print(config.rope_scaling, flush=True)
             self.model = LlamaForCausalLM.from_pretrained(
                 name_or_path,
                 config=config,
@@ -77,7 +193,8 @@ class HuggingFaceModel:
                 device_map="auto",
             )
             generation_kwargs['use_cache'] = True
-        elif 'landmark' in model_full_name:
+
+        elif model_full_name == "llama2-7b-hf-slimpajama-landmark":
             print('testing landmark')
             print(f'load model:{name_or_path}')
             self.pipeline = None
@@ -101,7 +218,8 @@ class HuggingFaceModel:
             generation_kwargs['offload_cache_to_cpu'] = False
             generation_kwargs['use_flash'] = False
             generation_kwargs['cache_top_k'] = 5
-        
+
+
         else:
             try:
                 print(f'load model:{name_or_path}')

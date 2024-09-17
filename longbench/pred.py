@@ -3,12 +3,15 @@ from datasets import load_dataset
 import torch
 import json
 import transformers
-from transformers import AutoTokenizer, LlamaTokenizer, LlamaForCausalLM, AutoModelForCausalLM
 from tqdm import tqdm
 import numpy as np
 import random
 import argparse
-# from llama_flash_attn_monkey_patch import replace_llama_attn_with_flash_attn
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+models_dir = os.path.dirname(current_dir)
+sys.path.append(models_dir)
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser()
@@ -76,8 +79,7 @@ def seed_everything(seed):
 def load_model_and_tokenizer(path, model_name, device):
     print('testing:', model_name)
     print('model path:', path)
-    if model_name == "llama2-7b-hf" or model_name == "llama2-7b-hf-slimpajama-pi-32k" or model_name == "llama2-7b-hf-slimpajama-longlora-32k" or \
-            model_name == "llama2-7b-hf-slimpajama-pi-32k-test4k" or model_name == "llama2-7b-hf-slimpajama-longlora-32k-test4k":
+    if model_name == "llama2-7b-hf" or model_name == "llama2-7b-hf-slimpajama-pi-32k" or model_name == "llama2-7b-hf-slimpajama-longlora-32k":
         config = transformers.AutoConfig.from_pretrained(path)
         print('rope_scaling:', config.rope_scaling)
         model = transformers.AutoModelForCausalLM.from_pretrained(
@@ -91,7 +93,7 @@ def load_model_and_tokenizer(path, model_name, device):
             path,
             config=config,
         )
-    elif model_name == "llama2-7b-hf-slimpajama-ntk-32k" or model_name == "llama2-7b-hf-slimpajama-ntk-32k-test4k":
+    elif model_name == "llama2-7b-hf-slimpajama-ntk-32k":
         config = transformers.AutoConfig.from_pretrained(path)
         print('rope_scaling:', config.rope_scaling)
         from models.llama_ntk_32k import LlamaForCausalLM
@@ -106,8 +108,7 @@ def load_model_and_tokenizer(path, model_name, device):
             path,
             config=config,
         )
-    elif model_name == "llama2-7b-hf-slimpajama-ntk-64k" or model_name == "llama-2-7b-hf-slimpajama-ntk-64k-2B" or \
-            model_name == "llama2-7b-hf-slimpajama-ntk-64k-test4k" or model_name == "llama-2-7b-hf-slimpajama-ntk-64k-2B-test4k" :
+    elif model_name == "llama2-7b-hf-slimpajama-ntk-64k" or model_name == "llama-2-7b-hf-slimpajama-ntk-64k-2B":
         config = transformers.AutoConfig.from_pretrained(path)
         print('rope_scaling:', config.rope_scaling)
         from models.llama_ntk_64k import LlamaForCausalLM
@@ -122,7 +123,7 @@ def load_model_and_tokenizer(path, model_name, device):
             path,
             config=config,
         )
-    elif model_name == "llama2-7b-hf-lminfinite" or model_name == "llama2-7b-hf-lminfinite-test4k":
+    elif model_name == "llama2-7b-hf-lminfinite":
         from models.llama_infinite import LlamaForCausalLM
         from models.llama_infinite.llama import convert_llama_model
         model = LlamaForCausalLM.from_pretrained(
@@ -134,7 +135,7 @@ def load_model_and_tokenizer(path, model_name, device):
         tokenizer = transformers.AutoTokenizer.from_pretrained(
             path,
         )
-    elif model_name == "llama2-7b-hf-ntk-frozen" or model_name == "llama2-7b-hf-ntk-frozen-test4k":
+    elif model_name == "llama2-7b-hf-ntk-frozen":
             # Set RoPE scaling factor
         config = transformers.AutoConfig.from_pretrained(
             path,
@@ -156,7 +157,7 @@ def load_model_and_tokenizer(path, model_name, device):
             path,
         )
         
-    elif model_name == "llama2-7b-hf-slimpajama-yarn-32k" or model_name == "llama2-7b-hf-slimpajama-yarn-32k-test4k":
+    elif model_name == "llama2-7b-hf-slimpajama-yarn-32k":
         from models.llama_yarn.modeling_llama_yarn import LlamaForCausalLM
         from models.llama_yarn.configuration_llama import LlamaConfig
         config_cls = LlamaConfig
@@ -173,8 +174,37 @@ def load_model_and_tokenizer(path, model_name, device):
         tokenizer = transformers.AutoTokenizer.from_pretrained(
             path,
         )
+    elif model_name == "llama2-7b-hf-selfextend":
+        from transformers import AutoModelForCausalLM
+        from models.llama_selfextend import SelfExtend
+        window_size = 1024
+        group_size = 64
+        use_flash = True
+        model = AutoModelForCausalLM.from_pretrained(path, device_map="auto", torch_dtype=torch.bfloat16, use_flash_attention_2=use_flash)
+        print(f'using group size {group_size} using window size {window_size}')
+        SelfExtend.apply(model, group_size, window_size, enable_flash_attention=use_flash, flash_attention_impl="flash_attn") ## flash_attention_impl="triton" or "flash_attn"
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            path,
+        )
+    elif model_name == "llama2-7b-hf-slimpajama-clex-32k":
+        print('eval clex')
+        from models.llama_clex import LlamaForCausalLM, CLEXLlamaConfig
+        config = CLEXLlamaConfig.from_pretrained(path)
+        config.log_scale = True
+        config.use_flashattn = True
+        print(config.rope_scaling, flush=True)
+        model = LlamaForCausalLM.from_pretrained(
+            path,
+            torch_dtype=torch.bfloat16,
+            config=config,
+            attn_implementation="flash_attention_2",
+            device_map="auto"
+        )
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            path,
+        )
 
-    elif model_name == "llama2-7b-hf-slimpajama-landmark" or model_name == "llama2-7b-hf-slimpajama-landmark-test4k":
+    elif model_name == "llama2-7b-hf-slimpajama-landmark":
         from models.llama_landmark.llama_mem import LlamaForCausalLM
         model = LlamaForCausalLM.from_pretrained(
             path,

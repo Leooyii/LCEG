@@ -1,7 +1,5 @@
 
-methods=("llama2-7b-hf" "llama2-7b-hf-lminfinite" "llama2-7b-hf-ntk-frozen" "llama-2-7b-hf-slimpajama-pi-32k" \
-    "llama-2-7b-hf-slimpajama-ntk-32k" "llama2-7b-hf-slimpajama-ntk-64k" "llama2-7b-hf-slimpajama-ntk-64k-2B" \
-    "llama2-7b-hf-slimpajama-yarn-32k" "llama2-7b-hf-slimpajama-longlora-32k" "llama2-7b-hf-slimpajama-landmark")
+methods=("llama2-7b-hf")
 
 for method in "${methods[@]}"; 
 do
