@@ -34,7 +34,7 @@ Repo for "<a href="https://arxiv.org/" target="_blank">A Controlled Study on Lon
 
 
 ## 🔥 News
-- [2023/07/01] LCEG paper is available on arxiv.
+- [2024/09/21] LCEG paper is available on arxiv.
 
 
 
