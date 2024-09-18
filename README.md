@@ -88,7 +88,7 @@ cd continuous_finetuning
 bash finetune.sh
 ```
 
-In `finetune.sh`, we provide 3 scripts for continuous fine-tuning on 6 methos: `origin`, `pi`, `ntk`, `yarn`, `longlora`, and `landmark`. Here is an example:
+In `finetune.sh`, we provide 3 scripts for continuous fine-tuning on 6 methods: `origin`, `pi`, `ntk`, `yarn`, `longlora`, and `landmark`. Here is an example:
 
 ```bash
 torchrun  --nproc_per_node=8 fine-tune.py  \
