@@ -7,13 +7,13 @@ A Controlled Study on Long Context Extension and Generalization in LLMs
 
 
 <p align="center">
-  <a href=""><b>[📜 Paper]</b></a> •
+  <a href="https://arxiv.org/pdf/2409.12181"><b>[📜 Paper]</b></a> •
   <a href="https://huggingface.co/Leooyii"><b>[🤗 HF HUB]</b></a> 
 </p>
 
 
 <p align="center">
-Repo for "<a href="https://arxiv.org/" target="_blank">A Controlled Study on Long Context Extension and Generalization in LLMs</a>"
+Repo for "<a href="https://arxiv.org/pdf/2409.12181" target="_blank">A Controlled Study on Long Context Extension and Generalization in LLMs</a>"
 </p>
 
 <img src="./fig/needle.png" width="1000" alt="" />
