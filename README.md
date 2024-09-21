@@ -36,7 +36,7 @@ Repo for "<a href="https://arxiv.org/pdf/2409.12181" target="_blank">A Controlle
 
 
 ## 🔥 News
-- [2024/09/21] LCEG paper is available on arxiv.
+- [2024/09/19] LCEG paper is available on arxiv.
 
 
 
